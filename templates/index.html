@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>스마트파킹</title>
+  <style>
+    body { font-family: sans-serif; padding: 20px; display: flex; gap: 40px; }
+    .left { flex: 3; }
+    .right { flex: 1; display: flex; flex-direction: column; gap: 10px; }
+    .photo { width: 100%; border-radius: 12px; }
+    .metrics { margin-top: 10px; }
+    .summary-boxes { display: flex; gap: 10px; margin-top: 20px; }
+    .box { border: 1px solid #ccc; padding: 10px 20px; border-radius: 10px; font-weight: bold; }
+    button { padding: 10px; font-size: 16px; border-radius: 8px; border: 1px solid #aaa; background-color: #fff; cursor: pointer; }
+  </style>
+</head>
+<body>
+  <div class="left">
+    <h1 id="lot-name">주차장 이름</h1>
+    <img id="lot-image" class="photo" src="" alt="주차장 이미지" />
+    <div class="metrics">
+      <p id="total-space">총 주차공간: </p>
+      <p id="remaining-space">남은 주차공간: </p>
+    </div>
+    <div class="summary-boxes">
+      <div class="box">총 주차공간 <span id="box-total">-</span>칸</div>
+      <div class="box">장기주차 탐지 <span id="long-term">-</span>자리</div>
+      <div class="box">장기주차 차량 <span id="long-cars">-</span>대</div>
+    </div>
+  </div>
+
+  <div class="right">
+    <h3>다른 구역</h3>
+    <button onclick="changeLot(1)">S3 주차장</button>
+    <button onclick="changeLot(2)">S4 주차장</button>
+    <button onclick="changeLot(3)">N4 주차장</button>
+    <button onclick="changeLot(4)">N7 주차장</button>
+  </div>
+
+  <script>
+    let currentLotId = 2;  // 기본은 S4
+
+    async function loadLotData(lotId) {
+      const res = await fetch(`/ParkingLots/${lotId}`);
+      const data = await res.json();
+
+      document.getElementById("lot-name").textContent = data.name;
+      document.getElementById("lot-image").src = `data:image/jpeg;base64,${data.image}`;
+      document.getElementById("total-space").textContent = `총 주차공간: ${data.total_space}`;
+      document.getElementById("remaining-space").textContent = `남은 주차공간: ${data.total_space - data.cnt}`;
+
+      document.getElementById("box-total").textContent = data.total_space;
+      document.getElementById("long-term").textContent = data.long_term || "13";  // 예시
+      document.getElementById("long-cars").textContent = data.long_car_count || "2"; // 예시
+    }
+
+    function changeLot(lotId) {
+      currentLotId = lotId;
+      loadLotData(currentLotId);
+    }
+
+    setInterval(() => {
+      loadLotData(currentLotId);
+    }, 5000);
+
+    loadLotData(currentLotId);
+  </script>
+</body>
+</html>
